@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Warung Online MVP</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<header>
+			<h1>Warung Online</h1>
+			<nav>
+				<ul>
+					<li><a href="/">Beranda</a></li>
+					<li><a href="/produk">Produk</a></li>
+					<li><a href="/keranjang">Keranjang</a></li>
+					<li><a href="/pesanan">Pesanan</a></li>
+				</ul>
+			</nav>
+		</header>
+		<main>
+			<section id="produk">
+				<h2>Daftar Produk</h2>
+				<ul>
+					<li>
+						<img src="gambar-1.jpeg" alt="Produk 1" />
+						<h3>Produk 1</h3>
+						<p>Harga: Rp50.000</p>
+						<button onclick="tambahKeKeranjang(1)">Tambah ke Keranjang</button>
+					</li>
+					<li>
+						<img src="gambar-2.jpg" alt="Produk 2" />
+						<h3>Produk 2</h3>
+						<p>Harga: Rp35.000</p>
+						<button onclick="tambahKeKeranjang(2)">Tambah ke Keranjang</button>
+					</li>
+					<!-- ... Daftar produk lainnya ... -->
+				</ul>
+			</section>
+			<section id="keranjang">
+				<h2>Keranjang Belanja</h2>
+				<ul id="keranjang-list">
+					<!-- ... Daftar item keranjang ... -->
+				</ul>
+				<p>Total Belanja: <span id="total-belanja">Rp0</span></p>
+				<button onclick="buatPesanan()">Buat Pesanan</button>
+			</section>
+		</main>
+		<footer>
+			<p>Hak Cipta &copy; 2023 Warung Online</p>
+		</footer>
+		<script>
+			// JavaScript for Warung Online MVP
+
+			const keranjang = [];
+
+			function tambahKeKeranjang(produkId) {
+				keranjang.push(produkId);
+				updateKeranjang();
+			}
+
+			function updateKeranjang() {
+				const keranjangList = document.getElementById("keranjang-list");
+				keranjangList.innerHTML = "";
+				let totalBelanja = 0;
+				for (const item of keranjang) {
+					const produkNama = getProdukNamaById(item);
+					const produkHarga = getProdukHargaById(item);
+					keranjangList.innerHTML += `<li>${produkNama} - Rp${produkHarga}</li>`;
+					totalBelanja += produkHarga;
+				}
+				document.getElementById(
+					"total-belanja"
+				).textContent = `Rp${totalBelanja}`;
+			}
+
+			function getProdukNamaById(id) {
+				// Mengambil data nama produk dari API atau struktur data lainnya
+				// Return nama produk berdasarkan id
+			}
+
+			function getProdukHargaById(id) {
+				// Mengambil data harga produk dari API atau struktur data lainnya
+				// Return harga produk berdasarkan id
+			}
+
+			function buatPesanan() {
+				// Mengirim pesanan ke backend menggunakan API
+				// Setelah pesanan selesai, hapus isi keranjang dan refresh antarmuka
+				// Contoh implementasi: Anda dapat menampilkan pesan sukses atau melakukan tindakan lainnya
+				alert("Pesanan berhasil dibuat!");
+				keranjang.length = 0; // Mengosongkan keranjang
+				updateKeranjang(); // Memperbarui tampilan keranjang
+			}
+		</script>
+	</body>
+</html>
