@@ -43,7 +43,8 @@ func (repo *PaymentData) SelectPaymentTransaction(idTransaction uint) (error) {
 		newStock := product.Stok - changeAmount
 		if newStock >= 0 {
 			product.Stok = newStock
-			if err := repo.db.Save(&product).Error; err != nil {
+			err := repo.db.Model(&structsEntity.Product{}).Where("id=?",productID).Update("stok",product.Stok)
+			if err != nil {
 				log.Printf("Error updating product stock for product '%s': %v", product.Nama, err)
 			} else {
 				fmt.Printf("Updated stock for product '%s', new stock: %d\n", product.Nama, product.Stok)
