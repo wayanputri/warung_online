@@ -20,11 +20,16 @@ func (repo *PaymentData) UpdatePayment(accept string, orderId string) (uint, err
 	if txx.Error != nil {
 		return 0, txx.Error
 	}
+	
 	var payment structsEntity.Payment
 	payment.Status = accept
 	tx := repo.db.Model(&structsEntity.Payment{}).Where("transaction_final_id=?", transaction.ID).Updates(payment)
 	if tx.Error != nil {
 		return 0, txx.Error
+	}
+	txxx:=repo.db.Where("transaction_final_id=?",transaction.ID).First(&payment)
+	if txxx.Error != nil {
+		return 0, txxx.Error
 	}
 	return payment.ID, nil
 }
