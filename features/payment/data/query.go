@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"log"
 	"warung_online/features/payment"
 	"warung_online/features/structsEntity"
 
@@ -25,7 +26,7 @@ func (repo *PaymentData) UpdatePayment(accept string, orderId string) (uint, err
 	if tx.Error != nil {
 		return 0, txx.Error
 	}
-	return payment.TransactionFinalID, nil
+	return payment.ID, nil
 }
 
 // Insert implements payment.PaymentDataInterface.
@@ -41,6 +42,7 @@ func (repo *PaymentData) Insert(input structsEntity.PaymentEntity) (uint, error)
 // SelectPaymentById implements payment.PaymentDataInterface.
 func (repo *PaymentData) SelectPaymentById(id uint) (structsEntity.PaymentEntity, error) {
 	var payment structsEntity.Payment
+	log.Println("id payment",id)
 	tx := repo.db.Preload("TransactionFinals").First(&payment, id)
 	if tx.Error != nil {
 		return structsEntity.PaymentEntity{}, tx.Error
