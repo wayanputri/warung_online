@@ -31,35 +31,9 @@ func (service *PaymentService) Notification(notificationPayload map[string]inter
 	if data.Status != "settlement"{
 		return structsEntity.PaymentEntity{},errors.New("pembayaran gagal")
 	}
-	IdsTransaction,errTransaction:=service.payment.SelectTransactionDetil(data.TransactionFinalID)
-	if errTransaction != nil{
-		return structsEntity.PaymentEntity{},errors.New("failed get transaction id")
-	}
-	jumlah,idProduct,errTrans:=service.payment.SelectTransaction(IdsTransaction)
-	if errTrans != nil{
-		return structsEntity.PaymentEntity{},errors.New("failed get product id and jumlah")
-	}
-
-	stok,dataProduct,errProduct:=service.payment.SelectProduct(idProduct)
-	if errProduct != nil{
-		return structsEntity.PaymentEntity{},errors.New("failed get stok and data product")
-	}
-	var dataProductId []uint
-	for _,value:=range dataProduct{
-		dataProductId=append(dataProductId, value.Id)
-	}
-	var stokBaru []int
-	for i:=0;i<len(jumlah);i++{
-		for j:=0;j<len(stok);j++{
-			if idProduct[i]==dataProductId[j]{
-				stokBaru[i]=stok[j]-jumlah[i]
-				stokBaru = append(stokBaru, stokBaru...)
-			}
-		}	
-	}
-	errUpdateProduct:=service.payment.UpdateProduct(stokBaru,idProduct)
-	if errUpdateProduct != nil{
-		return structsEntity.PaymentEntity{},errors.New("failed update data product")
+	errPayment:=service.payment.SelectPaymentTransaction(data.TransactionFinalID)
+	if errPayment != nil{
+		return structsEntity.PaymentEntity{},errors.New("failed get data payment")
 	}
 
 	return data,nil

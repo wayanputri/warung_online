@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -96,7 +95,6 @@ func ReadENV() *AppConfig{
 		app.KEY_SERVER_MIDTRANS = viper.Get("KEY_SERVER_MIDTRANS").(string)
 	}
 	JWT_SECRRET = app.jwtKey
-	fmt.Println("check",app.jwtKey)
 	return &app
 
 }

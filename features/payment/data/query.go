@@ -1,6 +1,8 @@
 package data
 
 import (
+	"fmt"
+	"log"
 	"warung_online/features/payment"
 	"warung_online/features/structsEntity"
 
@@ -11,20 +13,62 @@ type PaymentData struct {
 	db *gorm.DB
 }
 
+// SelectPaymentTransaction implements payment.PaymentDataInterface.
+func (repo *PaymentData) SelectPaymentTransaction(idTransaction uint) (error) {
+	var payment structsEntity.Payment
+	tx := repo.db.Where("transaction_final_id = ?", idTransaction).Preload("TransactionKeranjang.Transaction").First(&payment)
+	if tx.Error !=nil{
+		return tx.Error
+	}
+	// Map untuk melacak perubahan stok pada setiap produk
+	stockChanges := make(map[uint]int) // map[ProductID]changeAmount
+
+	// Iterasi melalui transaksi yang terkait
+	for _, item := range payment.TransactionFinals.TransactionKeranjang {
+		transaction := item.Transaction
+		for _, transactionItem := range transaction.TransactionKeranjang {
+			productID := transactionItem.Transaction.Products.ID
+			changeAmount := transactionItem.Transaction.Jumlah
+			stockChanges[productID] -= changeAmount
+		}
+	}
+
+	// Update stok produk
+	for productID, changeAmount := range stockChanges {
+		var product structsEntity.Product
+		if err := repo.db.First(&product, productID).Error; err != nil {
+			log.Printf("Error fetching product with ID %d: %v", productID, err)
+			continue
+		}
+		newStock := product.Stok + changeAmount
+		if newStock >= 0 {
+			product.Stok = newStock
+			if err := repo.db.Save(&product).Error; err != nil {
+				log.Printf("Error updating product stock for product '%s': %v", product.Nama, err)
+			} else {
+				fmt.Printf("Updated stock for product '%s', new stock: %d\n", product.Nama, product.Stok)
+			}
+		} else {
+			log.Printf("Insufficient stock for product '%s'\n", product.Nama)
+		}
+	}
+	return nil
+}
+
 // UpdatePayment implements payment.PaymentDataInterface.
 func (repo *PaymentData) UpdatePayment(accept string, orderId string) (uint, error) {
 	var transaction structsEntity.TransactionFinal
-	txx:=repo.db.Where("order_id=?",orderId).First(&transaction)
-	if txx.Error !=nil{
-		return 0,txx.Error
+	txx := repo.db.Where("order_id=?", orderId).First(&transaction)
+	if txx.Error != nil {
+		return 0, txx.Error
 	}
 	var payment structsEntity.Payment
-	payment.Status=accept
-	tx:=repo.db.Model(&structsEntity.Payment{}).Where("transaction_final_id=?",transaction.ID).Updates(payment)
-	if tx.Error !=nil{
-		return 0,txx.Error
+	payment.Status = accept
+	tx := repo.db.Model(&structsEntity.Payment{}).Where("transaction_final_id=?", transaction.ID).Updates(payment)
+	if tx.Error != nil {
+		return 0, txx.Error
 	}
-	return payment.TransactionFinalID,nil
+	return payment.TransactionFinalID, nil
 }
 
 // Insert implements payment.PaymentDataInterface.
@@ -119,13 +163,13 @@ func (repo *PaymentData) UpdateProduct(input []int, id []uint) error {
 	if tx.Error != nil {
 		return tx.Error
 	}
-	
+
 	for i, value := range input {
 		if i >= len(product) {
 			break
 		}
 		product[i].Stok = value
-		txx := repo.db.Model(&structsEntity.Product{}).Where("id=?",product[i].ID).Updates(product[i].Stok)
+		txx := repo.db.Model(&structsEntity.Product{}).Where("id=?", product[i].ID).Updates(product[i].Stok)
 		if txx.Error != nil {
 			return txx.Error
 		}

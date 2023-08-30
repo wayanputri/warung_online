@@ -11,6 +11,7 @@ type PaymentDataInterface interface {
 	UpdateProduct(input []int,id []uint)(error)
 	SelectPaymentById(id uint)(structsEntity.PaymentEntity,error)
 	UpdatePayment(accept string,orderId string)(uint,error)
+	SelectPaymentTransaction(idTransaction uint)(error)
 }
 
 type PaymentServiceInterface interface{
