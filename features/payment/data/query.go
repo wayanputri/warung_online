@@ -73,14 +73,16 @@ func (repo *PaymentData) SelectTransaction(id []uint) ([]int, []uint, error) {
 	if tx.Error != nil {
 		return nil, nil, tx.Error
 	}
-	var jumlah []int
-	for _, value1 := range transansactionModel {
-		jumlah = append(jumlah, value1.Jumlah)
-	}
 	var productId []uint
 	for _, value2 := range transansactionModel {
 		productId = append(productId, value2.ProductID)
 	}
+
+	var jumlah []int
+	for _, value1 := range transansactionModel {
+		jumlah = append(jumlah, value1.Jumlah)
+	}
+
 	return jumlah, productId, nil
 }
 
@@ -117,12 +119,13 @@ func (repo *PaymentData) UpdateProduct(input []int, id []uint) error {
 	if tx.Error != nil {
 		return tx.Error
 	}
+	
 	for i, value := range input {
 		if i >= len(product) {
 			break
 		}
 		product[i].Stok = value
-		txx := repo.db.Save(&product[i])
+		txx := repo.db.Model(&structsEntity.Product{}).Where("id=?",product[i].ID).Updates(product[i].Stok)
 		if txx.Error != nil {
 			return txx.Error
 		}
