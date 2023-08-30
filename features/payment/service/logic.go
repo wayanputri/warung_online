@@ -67,9 +67,9 @@ func (service *PaymentService) Notification(notificationPayload map[string]inter
 		return structsEntity.PaymentEntity{}, errors.New("failed get payment update")
 	}
 
-	if data.Status != "settlement"{
-		return structsEntity.PaymentEntity{}, errors.New("pembayaran gagal")
-	}
+	// if data.Status != "settlement"{
+	// 	return structsEntity.PaymentEntity{}, errors.New("pembayaran gagal")
+	// }
 
 	idTransaction,errTransaction:=service.payment.SelectTransactionDetil(data.TransactionFinalID)
 	if errTransaction != nil{
