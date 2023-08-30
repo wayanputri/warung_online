@@ -30,6 +30,7 @@ func (handler *PaymentHandler)Add(c echo.Context)error{
 	if err != nil{
 		return helper.InternalError(c,err.Error(),nil)
 	}
+	
 	response:=structsEntity.PaymentEntityToResponse(data)
 	return helper.SuccessCreate(c,"success create payment",response)
 }
@@ -45,6 +46,13 @@ func (handler *PaymentHandler) Notification(c echo.Context)error{
 	data,errNotification:=handler.paymentHandler.Notification(notificationPayload)
 	if errNotification !=nil{
 		return helper.InternalError(c,errNotification.Error(),nil)
+	}
+	if data.Status != "settlement"{
+		return helper.InternalError(c,"pembayaran gagal",nil)
+	}
+	errStok:=handler.paymentHandler.UpdateStok(data.TransactionFinalID)
+	if errStok !=nil{
+		return helper.InternalError(c,errStok.Error(),nil)
 	}
 	response:=structsEntity.PaymentEntityToResponse(data)
 	return helper.Success(c,"success notification",response)
