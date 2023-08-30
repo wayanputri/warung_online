@@ -12,31 +12,70 @@ type PaymentService struct {
 	payment payment.PaymentDataInterface
 }
 
+// UpdateStok implements payment.PaymentServiceInterface.
+func (service *PaymentService) UpdateStok(idTransactionFinal uint) error {
+	idTransaction,errTransaction:=service.payment.SelectTransactionDetil(idTransactionFinal)
+	if errTransaction != nil{
+		return errTransaction
+	}
+	dataTransaction,idProduct,errProduct:=service.payment.SelectTransaction(idTransaction)
+	if errProduct !=nil{
+		return errProduct
+	}
+
+	_,dataProduct,errStok:=service.payment.SelectProduct(idProduct)
+	if errStok != nil{
+		return errStok
+	}
+	var stokNew []int
+	for _,value:=range dataProduct{
+		for _,value1:=range dataTransaction{
+			if value1.ProductID==value.Id{
+				stok:=value.Stok-value1.Jumlah
+				stokNew=append(stokNew, stok)
+			}
+		}
+	}
+	var productEntity []structsEntity.ProductEntity
+	for _,value4:=range stokNew{
+		for _,value5:=range dataProduct{
+			value5.Stok=value4
+			productEntity = append(productEntity, value5)
+		}
+	}
+	errUp:=service.payment.UpdateProduct(productEntity)
+	if errUp != nil{
+		return errUp
+	}
+	return nil
+}
+
 // Notification implements payment.PaymentServiceInterface.
 func (service *PaymentService) Notification(notificationPayload map[string]interface{}) (structsEntity.PaymentEntity, error) {
-	client:=helper.SetMitrans()
+	client := helper.SetMitrans()
 
-	response,orderId,errOsrder:=helper.OrderIdMitrans(notificationPayload,client)
-	if errOsrder != nil{
-		return structsEntity.PaymentEntity{},errors.New("failed order id")
+	response, orderId, errOsrder := helper.OrderIdMitrans(notificationPayload, client)
+	if errOsrder != nil {
+		return structsEntity.PaymentEntity{}, errors.New("failed order id")
 	}
-	id,err:=service.payment.UpdatePayment(response.TransactionStatus,orderId)
-	if err != nil{
-		return structsEntity.PaymentEntity{},errors.New("update payment failed")
+	id, err := service.payment.UpdatePayment(response.TransactionStatus, orderId)
+	if err != nil {
+		return structsEntity.PaymentEntity{}, errors.New("update payment failed")
 	}
-	data,errGet:=service.payment.SelectPaymentById(id)
-	if errGet != nil{
-		return structsEntity.PaymentEntity{},errors.New("failed get payment update")
+	data, errGet := service.payment.SelectPaymentById(id)
+	if errGet != nil {
+		return structsEntity.PaymentEntity{}, errors.New("failed get payment update")
 	}
+
 	if data.Status != "settlement"{
-		return structsEntity.PaymentEntity{},errors.New("pembayaran gagal")
-	}
-	errPayment:=service.payment.SelectPaymentTransaction(data.TransactionFinalID)
-	if errPayment != nil{
-		return structsEntity.PaymentEntity{},errors.New("failed get data payment")
+		return structsEntity.PaymentEntity{}, errors.New("pembayaran gagal")
 	}
 
-	return data,nil
+	errStok:=service.UpdateStok(data.TransactionFinalID)
+	if errStok != nil{
+		return structsEntity.PaymentEntity{}, errors.New("update stok gagal")
+	}
+	return data, nil
 }
 
 // Add implements payment.PaymentServiceInterface.

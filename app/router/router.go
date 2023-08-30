@@ -84,4 +84,5 @@ func InitRouter(db *gorm.DB, c *echo.Echo){
 
 	c.POST("/transactiondetils/:transaction_id/payments",hPayment.Add,middleware.JWTMiddleware())
 	c.POST("/notifications",hPayment.Notification)
+	c.PUT("/transactiondetils/:transaction_id",hPayment.Update)
 }

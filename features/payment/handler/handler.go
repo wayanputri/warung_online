@@ -49,6 +49,19 @@ func (handler *PaymentHandler) Notification(c echo.Context)error{
 	response:=structsEntity.PaymentEntityToResponse(data)
 	return helper.Success(c,"success notification",response)
 }
+
+func (handler *PaymentHandler)Update(c echo.Context)error{
+	id:=c.Param("transaction_id")
+	idConv,errConv:=strconv.Atoi(id)
+	if errConv != nil{
+		return helper.FailedRequest(c,"id not valid",nil)
+	}
+	err:=handler.paymentHandler.UpdateStok(uint(idConv))
+	if err != nil{
+		return helper.InternalError(c,err.Error(),nil)
+	}
+	return helper.Success(c,"update berhasil",nil)
+}
 func New(handler payment.PaymentServiceInterface)*PaymentHandler{
 	return &PaymentHandler{
 		paymentHandler: handler,

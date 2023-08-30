@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"log"
 	"warung_online/features/payment"
 	"warung_online/features/structsEntity"
 
@@ -11,49 +10,6 @@ import (
 
 type PaymentData struct {
 	db *gorm.DB
-}
-
-// SelectPaymentTransaction implements payment.PaymentDataInterface.
-func (repo *PaymentData) SelectPaymentTransaction(idTransaction uint) (error) {
-	var payment structsEntity.Payment
-	tx := repo.db.Where("transaction_final_id = ?", idTransaction).Preload("TransactionKeranjang.Transaction").First(&payment)
-	if tx.Error !=nil{
-		return tx.Error
-	}
-	// Map untuk melacak perubahan stok pada setiap produk
-	stockChanges := make(map[uint]int) // map[ProductID]changeAmount
-
-	// Iterasi melalui transaksi yang terkait
-	for _, item := range payment.TransactionFinals.TransactionKeranjang {
-		transaction := item.Transaction
-		for _, transactionItem := range transaction.TransactionKeranjang {
-			productID := transactionItem.Transaction.Products.ID
-			changeAmount := transactionItem.Transaction.Jumlah
-			stockChanges[productID] -= changeAmount
-		}
-	}
-
-	// Update stok produk
-	for productID, changeAmount := range stockChanges {
-		var product structsEntity.Product
-		if err := repo.db.First(&product, productID).Error; err != nil {
-			log.Printf("Error fetching product with ID %d: %v", productID, err)
-			continue
-		}
-		newStock := product.Stok - changeAmount
-		if newStock >= 0 {
-			product.Stok = newStock
-			err := repo.db.Model(&structsEntity.Product{}).Where("id=?",productID).Update("stok",product.Stok)
-			if err != nil {
-				log.Printf("Error updating product stock for product '%s': %v", product.Nama, err)
-			} else {
-				fmt.Printf("Updated stock for product '%s', new stock: %d\n", product.Nama, product.Stok)
-			}
-		} else {
-			log.Printf("Insufficient stock for product '%s'\n", product.Nama)
-		}
-	}
-	return nil
 }
 
 // UpdatePayment implements payment.PaymentDataInterface.
@@ -112,7 +68,7 @@ func (repo *PaymentData) SelectProduct(idProduct []uint) ([]int, []structsEntity
 }
 
 // SelectTransaction implements payment.PaymentDataInterface.
-func (repo *PaymentData) SelectTransaction(id []uint) ([]int, []uint, error) {
+func (repo *PaymentData) SelectTransaction(id []uint) ([]structsEntity.TransactionEntity, []uint, error) {
 	var transansactionModel []structsEntity.Transaction
 	tx := repo.db.Where("id IN ?", id).Find(&transansactionModel)
 	if tx.Error != nil {
@@ -122,13 +78,12 @@ func (repo *PaymentData) SelectTransaction(id []uint) ([]int, []uint, error) {
 	for _, value2 := range transansactionModel {
 		productId = append(productId, value2.ProductID)
 	}
-
-	var jumlah []int
-	for _, value1 := range transansactionModel {
-		jumlah = append(jumlah, value1.Jumlah)
+	var transaction []structsEntity.TransactionEntity
+	for _,value:=range transansactionModel{
+		transaction=append(transaction, structsEntity.TransactionModelToEntity(value))
 	}
 
-	return jumlah, productId, nil
+	return transaction, productId, nil
 }
 
 // SelectTransactionDetil implements payment.PaymentDataInterface.
@@ -138,6 +93,7 @@ func (repo *PaymentData) SelectTransactionDetil(idTransaction uint) ([]uint, err
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+	fmt.Println("data transaction detil:",transansactionModel)
 	var ids []uint
 	for _, value := range transansactionModel {
 		ids = append(ids, value.TransactionID)
@@ -158,21 +114,22 @@ func (repo *PaymentData) SelectTransactionDetilById(idTransaction uint) (structs
 }
 
 // UpdateProduct implements payment.PaymentDataInterface.
-func (repo *PaymentData) UpdateProduct(input []int, id []uint) error {
-	var product []structsEntity.Product
-	tx := repo.db.Where("id IN ?", id).Find(&product)
-	if tx.Error != nil {
-		return tx.Error
-	}
+func (repo *PaymentData) UpdateProduct(input []structsEntity.ProductEntity) error {
+	var idProduct []uint
 
-	for i, value := range input {
-		if i >= len(product) {
-			break
-		}
-		product[i].Stok = value
-		txx := repo.db.Model(&structsEntity.Product{}).Where("id=?", product[i].ID).Updates(product[i].Stok)
-		if txx.Error != nil {
-			return txx.Error
+	for _,value:=range input{
+		idProduct = append(idProduct, value.Id)
+	}
+	var product []structsEntity.Product
+	for _,value:=range input{
+		product = append(product, structsEntity.ProductEntityToModel(value))
+	}
+	for _,id:=range idProduct{
+		for _,value1:=range product{
+			tx:=repo.db.Model(&structsEntity.Product{}).Where("id=?",id).Update("stok",value1.Stok)
+			if tx.Error != nil{
+				return tx.Error
+			}
 		}
 	}
 	return nil
