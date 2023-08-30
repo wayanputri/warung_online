@@ -71,9 +71,38 @@ func (service *PaymentService) Notification(notificationPayload map[string]inter
 		return structsEntity.PaymentEntity{}, errors.New("pembayaran gagal")
 	}
 
-	errStok:=service.UpdateStok(data.TransactionFinalID)
+	idTransaction,errTransaction:=service.payment.SelectTransactionDetil(data.TransactionFinalID)
+	if errTransaction != nil{
+		return structsEntity.PaymentEntity{},errTransaction
+	}
+	dataTransaction,idProduct,errProduct:=service.payment.SelectTransaction(idTransaction)
+	if errProduct !=nil{
+		return structsEntity.PaymentEntity{},errProduct
+	}
+
+	_,dataProduct,errStok:=service.payment.SelectProduct(idProduct)
 	if errStok != nil{
-		return structsEntity.PaymentEntity{}, errors.New("update stok gagal")
+		return structsEntity.PaymentEntity{},errStok
+	}
+	var stokNew []int
+	for _,value:=range dataProduct{
+		for _,value1:=range dataTransaction{
+			if value1.ProductID==value.Id{
+				stok:=value.Stok-value1.Jumlah
+				stokNew=append(stokNew, stok)
+			}
+		}
+	}
+	var productEntity []structsEntity.ProductEntity
+	for _,value4:=range stokNew{
+		for _,value5:=range dataProduct{
+			value5.Stok=value4
+			productEntity = append(productEntity, value5)
+		}
+	}
+	errUp:=service.payment.UpdateProduct(productEntity)
+	if errUp != nil{
+		return structsEntity.PaymentEntity{},errUp
 	}
 	return data, nil
 }
