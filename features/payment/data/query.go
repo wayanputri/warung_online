@@ -40,7 +40,7 @@ func (repo *PaymentData) SelectPaymentTransaction(idTransaction uint) (error) {
 			log.Printf("Error fetching product with ID %d: %v", productID, err)
 			continue
 		}
-		newStock := product.Stok + changeAmount
+		newStock := product.Stok - changeAmount
 		if newStock >= 0 {
 			product.Stok = newStock
 			if err := repo.db.Save(&product).Error; err != nil {
