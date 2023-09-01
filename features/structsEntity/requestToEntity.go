@@ -64,6 +64,7 @@ func PaymentRequestToEntity(payment PaymentRequest) PaymentEntity {
 func ReviewRequestToEntity(review ReviewRequest) ReviewEntity {
 	return ReviewEntity{
 		PaymentID:  review.PaymentID,
+		ProductID:  review.ProductID,
 		TextReview: review.TextReview,
 		Rating:     review.Rating,
 	}

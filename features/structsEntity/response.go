@@ -29,6 +29,7 @@ type ProductResponse struct {
 	Users        UserResponse           `json:"users,omitempty"`
 	Image        []ImageProductResponse `json:"image,omitempty"`
 	Transactions []TransactionResponse  `json:"transactions,omitempty"`
+	Review       []ReviewResponse       `json:"reviews,omitempty"`
 }
 
 type ImageProductResponse struct {
@@ -84,10 +85,12 @@ type PaymentResponse struct {
 type ReviewResponse struct {
 	Id           uint          `json:"id,omitempty" form:"id"`
 	CreatedAt    time.Time     `json:"created_at,omitempty"`
-	PaymentID    uint          `json:"column:payment_id,omitempty" form:"payment_id"`
+	PaymentID    uint          `json:"payment_id,omitempty" form:"payment_id"`
+	ProductID    uint			`json:"product_id" form:"product_id"`
 	TextReview   string        `json:"text_review,omitempty" form:"text_review"`
 	Rating       float64       `json:"rating,omitempty" form:"rating"`
 	Payments     PaymentResponse       `json:"payments,omitempty"`
+	Products     ProductResponse `json:"products,omitempty"`
 	ImageReviews []ImageReviewResponse `json:"image_reviews,omitempty"`
 }
 
@@ -113,6 +116,7 @@ type ProductResponseAll struct {
 	Harga        int            `json:"harga,omitempty" form:"harga"`
 	Ratings      float64        `json:"ratings,omitempty" form:"ratings"`
 	Image        []ImageProductResponseAll `json:"image,omitempty"`
+	Review       []ReviewResponseAll `json:"review,omitempty"`
 }
 
 
@@ -151,6 +155,7 @@ type ReviewResponseAll struct {
 	Id           uint          `json:"id,omitempty" form:"id"`
 	TextReview   string        `json:"text_review,omitempty" form:"text_review"`
 	Rating       float64       `json:"rating,omitempty" form:"rating"`
+	ProductID 	 uint 			`json:"product_id" form:"product_id"`
 }
 
 type ImageReviewResponseAll struct {

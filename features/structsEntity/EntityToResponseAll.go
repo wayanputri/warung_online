@@ -15,12 +15,17 @@ func ProductEntityToResponseAll(product ProductEntity) ProductResponseAll {
 	for _, value := range product.Image {
 		image = append(image, ImageProductEntityToResponseAll(value))
 	}
+	var review []ReviewResponseAll
+	for _, value := range product.Review {
+		review = append(review, ReviewEntityToResponseAll(value))
+	}
 	return ProductResponseAll{
 		Id:      product.Id,
 		Nama:    product.Nama,
 		Harga:   product.Harga,
 		Ratings: product.Ratings,
 		Image:   image,
+		Review:  review,
 	}
 }
 
@@ -58,6 +63,7 @@ func ReviewEntityToResponseAll(review ReviewEntity) ReviewResponseAll {
 		Id:         review.Id,
 		TextReview: review.TextReview,
 		Rating:     review.Rating,
+		ProductID:  review.ProductID,
 	}
 }
 

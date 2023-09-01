@@ -35,6 +35,11 @@ func ProductEntityToResponse(product ProductEntity) ProductResponse {
 	for _, transaction := range product.Transactions {
 		transactions = append(transactions, TransactionEntityToResponse(transaction))
 	}
+	var reviews []ReviewResponse
+	for _,review := range product.Review{
+		reviews = append(reviews, ReviewEntityToResponse(review))
+	}
+
 	return ProductResponse{
 		Id:           product.Id,
 		CreatedAt:    product.CreatedAt,
@@ -48,6 +53,7 @@ func ProductEntityToResponse(product ProductEntity) ProductResponse {
 		Users:        UserEntityToResponse(product.Users),
 		Image:        images,
 		Transactions: transactions,
+		Review: 	  reviews,
 	}
 }
 
@@ -134,9 +140,11 @@ func ReviewEntityToResponse(review ReviewEntity) ReviewResponse {
 		Id:           review.Id,
 		CreatedAt:    review.CreatedAt,
 		PaymentID:    review.PaymentID,
+		ProductID: 	  review.ProductID,
 		TextReview:   review.TextReview,
 		Rating:       review.Rating,
 		Payments:     PaymentEntityToResponse(review.Payments),
+		Products: 	  ProductEntityToResponse(review.Products),
 		ImageReviews: imageReview,
 	}
 }

@@ -29,6 +29,7 @@ type Product struct{
 	Users		User    `gorm:"foreignKey:UserID"`
 	Image		[]ImageProduct `gorm:"foreignKey:ProductID"`
 	Transaction []Transaction	`gorm:"foreignKey:ProductID"`
+	Reviews 	[]Review `gorm:"foreignKey:ProductID"`
 }
 
 type ImageProduct struct{
@@ -78,8 +79,10 @@ type Payment struct{
 type Review struct{
 	gorm.Model
 	PaymentID 	uint 	`gorm:"column:payment_id;not null"`
+	ProductID   uint	`gorm:"column:product_id;not null"`
 	TextReview 	string 	`gorm:"text_review"`
 	Rating 		float64 `gorm:"rating;not null"`
+	Product		Product `gorm:"foreignKey:ProductID"`
 	Payments	Payment `gorm:"foreignKey:PaymentID"`
 	ImageReviews []ImageReview `gorm:"foreignKey:ReviewID"`
 }

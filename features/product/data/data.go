@@ -30,7 +30,7 @@ func (data ProductData) Searching(name string) ([]structsEntity.ProductEntity, e
 // SelectById implements product.ProductDataInterface.
 func (data ProductData) SelectById(id uint) (structsEntity.ProductEntity, error) {
 	var productModel structsEntity.Product
-	tx := data.db.Preload("Users").Preload("Image").Preload("Transaction").First(&productModel, id)
+	tx := data.db.Preload("Users").Preload("Image").Preload("Transaction").Preload("Reviews").First(&productModel, id)
 	if tx.Error != nil {
 		return structsEntity.ProductEntity{}, tx.Error
 	}

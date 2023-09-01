@@ -45,7 +45,8 @@ type PaymentRequest struct {
 }
 
 type ReviewRequest struct {
-	PaymentID  uint    `json:"column:payment_id" form:"payment_id"`
+	PaymentID  uint    `json:"payment_id" form:"payment_id"`
+	ProductID  uint    `json:"product_id" form:"product_id"`
 	TextReview string  `json:"text_review" form:"text_review"`
 	Rating     float64 `json:"rating" form:"rating"`
 }

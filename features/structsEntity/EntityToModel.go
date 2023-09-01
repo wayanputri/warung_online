@@ -33,6 +33,11 @@ func ProductEntityToModel(product ProductEntity) Product {
 	for _, transaction := range product.Transactions {
 		transactions = append(transactions, TransactionEntityToModel(transaction))
 	}
+
+	var reviews []Review
+	for _, review := range product.Review {
+		reviews = append(reviews, ReviewEntityToModel(review))
+	}
 	return Product{
 		UserID:      product.UserID,
 		Nama:        product.Nama,
@@ -44,6 +49,7 @@ func ProductEntityToModel(product ProductEntity) Product {
 		Users:       UserEntityToModel(product.Users),
 		Image:       images,
 		Transaction: transactions,
+		Reviews:     reviews,
 	}
 }
 
@@ -120,7 +126,9 @@ func ReviewEntityToModel(review ReviewEntity) Review {
 	return Review{
 		PaymentID:    review.PaymentID,
 		TextReview:   review.TextReview,
+		ProductID:    review.ProductID,
 		Rating:       review.Rating,
+		Product:      ProductEntityToModel(review.Products),
 		Payments:     PaymentEntityToModel(review.Payments),
 		ImageReviews: imageReview,
 	}

@@ -35,6 +35,7 @@ type ProductEntity struct {
 	Users        UserEntity           `json:"users,omitempty"`
 	Image        []ImageProductEntity `json:"image,omitempty"`
 	Transactions []TransactionEntity  `json:"transactions,omitempty"`
+	Review       []ReviewEntity `json:"reviews,omitempty"`
 }
 
 type ImageProductEntity struct {
@@ -105,7 +106,9 @@ type ReviewEntity struct {
 	PaymentID    uint          `json:"column:payment_id" form:"payment_id"`
 	TextReview   string        `json:"text_review" form:"text_review"`
 	Rating       float64       `json:"rating" form:"rating"`
+	ProductID     uint         `json:"product_id" form:"product_id"`
 	Payments     PaymentEntity       `json:"payments,omitempty"`
+	Products     ProductEntity       `json:"products,omitempty"`
 	ImageReviews []ImageReviewEntity `json:"image_reviews,omitempty"`
 }
 
