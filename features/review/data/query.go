@@ -58,6 +58,9 @@ func (repo *ReviewData) Insert(input structsEntity.ReviewEntity, idProduct uint)
 	if tx.Error != nil {
 		return 0, errors.New("failed insert review")
 	}
+	if tx.RowsAffected == 0 {
+		return 0,errors.New("row not affected")
+	}
 	return inputModel.ID, nil
 }
 
@@ -122,6 +125,9 @@ func (repo *ReviewData) UpdateProduct(input float64, idUser uint, idproduct uint
 	tx := repo.db.Model(&structsEntity.Product{}).Where("id=?", idproduct).Updates(updateReview)
 	if tx.Error != nil {
 		return 0, errors.New("failed update product")
+	}
+	if tx.RowsAffected == 0 {
+		return 0,errors.New("row not affected")
 	}
 	return idproduct, nil
 }

@@ -30,6 +30,10 @@ import (
 	handlerReview "warung_online/features/review/handler"
 	serviceReview "warung_online/features/review/service"
 
+	dataImageReview "warung_online/features/imageReview/data"
+	handlerImageReview "warung_online/features/imageReview/handler"
+	serviceImageReview "warung_online/features/imageReview/service"
+
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -94,4 +98,11 @@ func InitRouter(db *gorm.DB, c *echo.Echo){
 	hReview := handlerReview.New(sReview)
 	c.POST("/products/:product_id/payments/:payment_id/reviews",hReview.Add,middleware.JWTMiddleware())
 	c.DELETE("/reviews/:id",hReview.Delete,middleware.JWTMiddleware())
+
+	dImageReview := dataImageReview.New(db)
+	sImageReview := serviceImageReview.New(dImageReview)
+	hImageReview := handlerImageReview.New(sImageReview)
+
+	c.POST("/imagereviews/:idReview",hImageReview.Add,middleware.JWTMiddleware())
+	c.DELETE("/imagereviews/:idImageReview",hImageReview.Delete,middleware.JWTMiddleware())
 }
